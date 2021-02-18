@@ -14,7 +14,12 @@ typedef struct list_node {
 	struct list_node *next;
 } list_node;
 
-list_node *list_node_heapctor() {
+list_node *list_node_heapctor(char *word, int n) {
+	list_node *this = malloc(sizeof(list_node));
+	this->next = NULL;
+	this->val = word;
+	this->n = n;
+	return this;
 }
 
 tree_node *tree_node_heapctor(char *word) {
