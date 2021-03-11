@@ -1,10 +1,10 @@
 #include "dictionary.h"
 
-typedef struct tree_node node;
+typedef struct tree_node tree_node;
 
 typedef struct dictionary_treedict {
 	dictionary;
-	node *root;
+	tree_node *root;
 } dictionary_treedict;
 
 void dictionary_treedict_ctor(dictionary_treedict *this);

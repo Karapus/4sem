@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <csignal>
 #include <termios.h>
+#include <sys/ioctl.h>
 
 namespace {
 
@@ -21,6 +22,10 @@ Tui::Tui() {
 	sa.sa_handler = winSizeChgHandler;
 	sa.sa_flags = SA_RESTART;
 	sigaction(SIGWINCH, &sa, NULL);
+}
+
+Coord Tui::getSize() const {
+	return Coord{size_.ws_col - 2, size_.ws_row - 2};
 }
 
 void Tui::clear() {
@@ -87,4 +92,19 @@ void Tui::drawVerLine(int len) {
 		chgPosRel(0, 1);
           }
 
+}
+
+void Tui::drawRab(Coord pos) {
+	chgPos(pos.x + 1, pos.y + 1);
+	putchar('#');
+}
+
+void Tui::drawSnake(std::list<Coord> body) {
+	for (auto cord : body) {
+		chgPos(cord.x + 1, cord.y + 1);
+		putchar('o');
+	}
+}
+
+void Tui::drawSnake(Coord head, Coord tail) {
 }

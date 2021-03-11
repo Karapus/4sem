@@ -1,9 +1,6 @@
 #include "view.h"
-#include <cstdio>
-#include <sys/ioctl.h>
 
 class Tui : public View {
-//	winsize size_;
 	void clear();
 	void chgPos(int x = 0, int y = 0);
 	void chgPosRel(int x, int y = 0);
@@ -13,6 +10,10 @@ class Tui : public View {
 	void drawVerLine(int len);
 public:
 	void draw() override;
-	void run();
+	void run() override;
+	void drawRab(Coord pos) override;
+	void drawSnake(Coord head, Coord tail) override;
+	void drawSnake(std::list<Coord> body) override;
+	Coord getSize() const override;
 	Tui();
 };
