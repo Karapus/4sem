@@ -1,8 +1,9 @@
 #include "tui.h"
 #include <cstdio>
 #include <csignal>
-#include <termios.h>
 #include <sys/ioctl.h>
+#include <poll.h>
+#include <chrono>
 
 namespace {
 
@@ -22,14 +23,23 @@ Tui::Tui() {
 	sa.sa_handler = winSizeChgHandler;
 	sa.sa_flags = SA_RESTART;
 	sigaction(SIGWINCH, &sa, NULL);
+
+	tcgetattr(0, &term);
+	termios newterm = term;
+	cfmakeraw(&newterm);
+	tcsetattr(0, TCSANOW, &newterm);
+}
+
+Tui::~Tui() {
+	tcsetattr(0, TCSANOW, &term);
 }
 
 Coord Tui::getSize() const {
-	return Coord{size_.ws_col - 2, size_.ws_row - 2};
+	return Coord{size_.ws_col - 4, size_.ws_row - 4};
 }
 
 void Tui::clear() {
-	std::printf("\e[2J");
+	std::printf("\e[2J\e[?25l");
 }
 
 void Tui::chgPos(int x, int y) {
@@ -74,9 +84,36 @@ void Tui::draw() {
 	drawHorLine(size_.ws_col - 1);
 }
 
-void Tui::run() {
-	while (std::getchar() != EOF)
-		draw();
+void Tui::stop() {
+	loop_flag_ = false;
+}
+
+void Tui::runloop() {
+	pollfd in;
+	in.fd = 0;
+	in.events = POLLIN;
+
+	auto nexttime = period_;
+	while (loop_flag_) {
+		auto start = std::chrono::system_clock::now();
+		int res = poll(&in, 1, nexttime);
+		if (res < 0) {
+			perror("Poll error: ");
+			return;
+		}
+		if (res > 0) {
+			auto end = std::chrono::system_clock::now();
+			int key = std::getchar();
+			for (auto &&sub : callkey_)
+				sub(key);
+			auto dur = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+			nexttime = period_ - dur.count();
+		}
+		if (nexttime < 0 || res == 0) {
+			calltimer_();
+			nexttime = period_;
+		}
+	}
 }
 
 void Tui::drawHorLine(int len) {
@@ -94,17 +131,38 @@ void Tui::drawVerLine(int len) {
 
 }
 
+void Tui::drawEmpty(Coord pos) {
+	chgPos(pos.x + 2, pos.y + 2);
+	putchar(' ');
+}
+
 void Tui::drawRab(Coord pos) {
-	chgPos(pos.x + 1, pos.y + 1);
+	chgPos(pos.x + 2, pos.y + 2);
 	putchar('#');
 }
 
 void Tui::drawSnake(std::list<Coord> body) {
 	for (auto cord : body) {
-		chgPos(cord.x + 1, cord.y + 1);
+		chgPos(cord.x + 2, cord.y + 2);
 		putchar('o');
 	}
 }
 
+void Tui::drawSnake(Coord head) {
+	chgPos(head.x + 2, head.y + 2);
+	putchar('o');
+}
+
 void Tui::drawSnake(Coord head, Coord tail) {
+	drawSnake(head);
+	drawEmpty(tail);
+}
+
+void Tui::subscribeKey(std::function<void(int)> callkey) {
+	callkey_.push_back(callkey);
+}
+
+void Tui::subscribeTimer(std::function<void()> calltimer, int period) {
+	calltimer_ = calltimer;
+	period_ = period;
 }

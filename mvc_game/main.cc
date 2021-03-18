@@ -1,6 +1,8 @@
 #include "tui.h"
 #include "gui.h"
 #include "game.h"
+#include "humanc.h"
+#include "botc.hh"
 #include <cstring>
 #include <memory>
 
@@ -13,5 +15,7 @@ int main(int argc, char **argv) {
 	}
 	ui->draw();
 	Game game{ui.get()};
-	ui->run();
+	HumanC huc{game, ui.get()};
+	BotC{game, ui.get()};
+	ui->runloop();
 }
