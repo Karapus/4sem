@@ -2,7 +2,7 @@
 #include "gui.h"
 #include "game.h"
 #include "humanc.h"
-#include "botc.hh"
+#include "botc.h"
 #include <cstring>
 #include <memory>
 

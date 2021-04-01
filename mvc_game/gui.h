@@ -1,21 +1,6 @@
 #include "view.h"
-#include <termios.h>
-#include <list>
 
-class Tui : public View {
-	std::list<KeyFn>  callkey_;
-	std::list<TimerFn> calltimer_;
-	int period_;
-	termios term;
-	bool loop_flag_ = true;
-
-	void clear();
-	void chgPos(int x = 0, int y = 0);
-	void chgPosRel(int x, int y = 0);
-	void savePos();
-	void restorePos();
-	void drawHorLine(int len);
-	void drawVerLine(int len);
+class Gui : public View {
 public:
 	void draw() override;
 	void stop() override;
@@ -28,6 +13,5 @@ public:
 	Coord getSize() const override;
 	void subscribeKey(std::function<void(int)> callkey) override;
 	void subscribeTimer(std::function<void()> calltimer, int period) override;
-	Tui();
-	~Tui();
+	Gui();
 };

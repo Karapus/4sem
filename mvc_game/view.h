@@ -1,6 +1,12 @@
 #pragma once
-#include "game.h"
 #include <functional>
+#include <list>
+
+struct Coord {
+	int x;
+	int y;
+};
+bool operator == (Coord lhs, Coord rhs);
 
 struct View {
 	virtual void draw() = 0;
@@ -11,10 +17,13 @@ struct View {
 	virtual void drawSnake(Coord head) = 0;
 	virtual void drawSnake(Coord head, Coord tail) = 0;
 	virtual void drawSnake(std::list<Coord> body) = 0;
+
 	using KeyFn = std::function<void(int)>; 
 	virtual void subscribeKey(KeyFn callkey) = 0;
+	
 	using TimerFn = std::function<void()>; 
-	virtual void subscribeTimer(TimerFn calltimer, int period) = 0;
+	virtual void subscribeTimer(TimerFn calltimer, int period = 0) = 0;
+	
 	virtual Coord getSize() const = 0;
 	virtual ~View() = default; 
 };

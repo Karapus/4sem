@@ -110,7 +110,8 @@ void Tui::runloop() {
 			nexttime = period_ - dur.count();
 		}
 		if (nexttime < 0 || res == 0) {
-			calltimer_();
+			for (auto &&sub : calltimer_)
+				sub();
 			nexttime = period_;
 		}
 	}
@@ -128,7 +129,6 @@ void Tui::drawVerLine(int len) {
 		restorePos();
 		chgPosRel(0, 1);
           }
-
 }
 
 void Tui::drawEmpty(Coord pos) {
@@ -163,6 +163,7 @@ void Tui::subscribeKey(std::function<void(int)> callkey) {
 }
 
 void Tui::subscribeTimer(std::function<void()> calltimer, int period) {
-	calltimer_ = calltimer;
-	period_ = period;
+	calltimer_.push_back(calltimer);
+	if (period)
+		period_ = period;
 }
