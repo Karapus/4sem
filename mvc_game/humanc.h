@@ -24,7 +24,8 @@ private:
 		}
 	}
 public:
-	HumanC(Game &game, View *view) : view_(view), snake(game.makeSnake()) {
+	HumanC(Game &game, View *view, Color clr = MAGENTA) : view_(view), snake(game.makeSnake()) {
+		snake.clr_ = clr;
 		view_->subscribeKey(std::bind(&HumanC::Control, this, std::placeholders::_1));
 	}
 };

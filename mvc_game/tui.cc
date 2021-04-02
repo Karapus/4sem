@@ -72,7 +72,13 @@ void Tui::restorePos() {
 	std::printf("\e[u");
 }
 
+void Tui::setColor(Color clr) {
+	std::printf("\e[%dm", 40 + clr);
+
+}
+
 void Tui::draw() {
+	setColor();
 	clear();
 	chgPos();
 	drawHorLine(size_.ws_col);
@@ -132,38 +138,32 @@ void Tui::drawVerLine(int len) {
 }
 
 void Tui::drawEmpty(Coord pos) {
+	setColor();
 	chgPos(pos.x + 2, pos.y + 2);
 	putchar(' ');
 }
 
 void Tui::drawRab(Coord pos) {
+	setColor();
 	chgPos(pos.x + 2, pos.y + 2);
 	putchar('#');
 }
 
-void Tui::drawSnake(std::list<Coord> body) {
+void Tui::drawSnake(std::list<Coord> body, Color clr) {
+	setColor(clr);
 	for (auto cord : body) {
 		chgPos(cord.x + 2, cord.y + 2);
 		putchar('o');
 	}
 }
 
-void Tui::drawSnake(Coord head) {
+void Tui::drawSnake(Coord head, Color clr) {
+	setColor(clr);
 	chgPos(head.x + 2, head.y + 2);
 	putchar('o');
 }
 
-void Tui::drawSnake(Coord head, Coord tail) {
-	drawSnake(head);
+void Tui::drawSnake(Coord head, Coord tail, Color clr) {
+	drawSnake(head, clr);
 	drawEmpty(tail);
-}
-
-void Tui::subscribeKey(std::function<void(int)> callkey) {
-	callkey_.push_back(callkey);
-}
-
-void Tui::subscribeTimer(std::function<void()> calltimer, int period) {
-	calltimer_.push_back(calltimer);
-	if (period)
-		period_ = period;
 }

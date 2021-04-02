@@ -3,9 +3,6 @@
 #include <list>
 
 class Tui : public View {
-	std::list<KeyFn>  callkey_;
-	std::list<TimerFn> calltimer_;
-	int period_;
 	termios term;
 	bool loop_flag_ = true;
 
@@ -16,18 +13,17 @@ class Tui : public View {
 	void restorePos();
 	void drawHorLine(int len);
 	void drawVerLine(int len);
+	void setColor(Color clr = BLACK);
 public:
 	void draw() override;
 	void stop() override;
 	void runloop() override;
 	void drawEmpty(Coord pos) override;
 	void drawRab(Coord pos) override;
-	void drawSnake(Coord head) override;
-	void drawSnake(Coord head, Coord tail) override;
-	void drawSnake(std::list<Coord> body) override;
+	void drawSnake(Coord head, Color clr) override;
+	void drawSnake(Coord head, Coord tail, Color clr) override;
+	void drawSnake(std::list<Coord> body, Color clr) override;
 	Coord getSize() const override;
-	void subscribeKey(std::function<void(int)> callkey) override;
-	void subscribeTimer(std::function<void()> calltimer, int period) override;
-	Tui();
 	~Tui();
+	Tui();
 };

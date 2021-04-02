@@ -1,6 +1,6 @@
-OBJ = main.o tui.o gui.o game.o
+OBJ = main.o view.o tui.o gui.o game.o
 PROG = snake
-LIBS =
+LIBS =-lsfml-graphics -lsfml-window -lsfml-system
 CXXFLAGS +=-Wall -Wextra -g
 
 $(PROG): $(OBJ)
