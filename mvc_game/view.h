@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <list>
+#include <string_view>
 
 struct Coord {
 	int x;
@@ -37,6 +38,6 @@ public:
 	virtual Coord getSize() const = 0;
 	
 	virtual ~View() = default;
-	static View *get(const char *arg);
+	static View *get(std::string_view arg);
 	View() = default;
 };
