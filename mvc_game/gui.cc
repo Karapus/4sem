@@ -1,5 +1,7 @@
 #include "gui.h"
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Rect.hpp>
+#include <SFML/Window/Event.hpp>
 namespace {
 sf::Color toSf(Color clr) {
 	switch (clr) {
@@ -61,6 +63,9 @@ void Gui::runloop() {
 				case sf::Event::KeyPressed:
 					for (auto &&sub : callkey_)
 						sub(fromSf(event.key.code));
+					break;
+				case sf::Event::Resized:
+					window_.setView(sf::View(sf::FloatRect(0, 0, event.size.width, event.size.height)));
 					break;
 				case sf::Event::Closed:
 					stop();
