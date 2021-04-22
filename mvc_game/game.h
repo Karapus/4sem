@@ -24,17 +24,16 @@ class Snake {
 	Snake(std::list<Coord> &&body, Direction dir);
 };
 
-class View;
-
 class Game final {
+	unsigned rabs_n_;
+	unsigned snakes_l_;
 	std::list<Rabbit> rabbits_;
 	std::list<Snake> snakes_;
-	View *view_;
 	Coord getFreePos() const;
 	Coord getFreePos(Coord prev_pos) const;
 public:
 	void tick();
-	Game(View *view);
+	Game(unsigned rabs_n = 20, unsigned snks_l = 3, unsigned period = 100);
 	Snake &makeSnake();
 	const auto &getSnakes() const {
 		return snakes_;

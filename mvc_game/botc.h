@@ -27,12 +27,12 @@ private:
 			snake_.dir_ = Y_DEC;
 	}
 public:
-	BotC(Game &game, View *view) :
+	BotC(Game &game) :
 		snake_(game.makeSnake()),
 		game_(game),
 		rabs_(game.getRabbits()),
 		snks_(game.getSnakes())
 	{
-		view->subscribeTimer(std::bind(&BotC::Control, this));
+		View::get()->subscribeTimer(std::bind(&BotC::Control, this));
 	}
 };

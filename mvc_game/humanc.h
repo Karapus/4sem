@@ -5,7 +5,6 @@
 
 class HumanC {
 private:
-	View *view_;
 	Snake& snake;
 	void Control(int key) {
 		switch (std::toupper(key)) {
@@ -24,8 +23,8 @@ private:
 		}
 	}
 public:
-	HumanC(Game &game, View *view, Color clr = MAGENTA) : view_(view), snake(game.makeSnake()) {
+	HumanC(Game &game, Color clr = MAGENTA) : snake(game.makeSnake()) {
 		snake.clr_ = clr;
-		view_->subscribeKey(std::bind(&HumanC::Control, this, std::placeholders::_1));
+		View::get()->subscribeKey(std::bind(&HumanC::Control, this, std::placeholders::_1));
 	}
 };

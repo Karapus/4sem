@@ -8,10 +8,6 @@
 #include <iostream>
 
 namespace {
-constexpr int INIT_RABBIT_N = 80;
-constexpr int INIT_SNAKES_N = 5;
-constexpr int INIT_SNAKES_L = 3;
-constexpr int INIT_PERIOD = 100;
 
 std::default_random_engine rand_gen{static_cast<unsigned>(time(0))};
 }
@@ -36,11 +32,15 @@ Coord nextCord(Coord pos, Direction dir) {
 	}
 }
 
-Game::Game(View *v) : view_(v) {
-	view_->subscribeTimer(std::bind(&Game::tick, this), INIT_PERIOD);
-	view_->subscribeKey([=](int key){
+Game::Game(unsigned rabs_n, unsigned snks_l, unsigned period) :
+	rabs_n_(rabs_n),
+	snakes_l_(snks_l)
+{
+	auto view = View::get();
+	view->subscribeTimer(std::bind(&Game::tick, this), period);
+	view->subscribeKey([=](int key){
 			if (std::toupper(key) == 'Q')
-				view_->stop();
+				view->stop();
 			});
 }
 
@@ -48,7 +48,7 @@ Snake &Game::makeSnake() {
 	std::list<Coord> body;
 	body.push_back(getFreePos());
 	auto dir = X_INC;
-	for (int i = 0; i < INIT_SNAKES_L; i++)
+	for (unsigned i = 0; i < snakes_l_; i++)
 		body.push_back(body.back());
 	snakes_.push_back(Snake(std::move(body), dir));
 	return snakes_.back();
@@ -70,7 +70,7 @@ bool Game::checkIfFree(Coord cord) const {
 }
 
 Coord Game::getFreePos() const {
-	Coord sz = view_->getSize();
+	Coord sz = View::get()->getSize();
 	Coord cord;
 	auto x_distr = std::uniform_int_distribution<int>(0, sz.x);
 	auto y_distr = std::uniform_int_distribution<int>(0, sz.y);
@@ -80,22 +80,18 @@ Coord Game::getFreePos() const {
 	} while (checkIfFree(cord));
 	return cord;
 }
-#if 0
-Coord Game::getFreePos(Coord prev_pos) const { 
-	Coord cord;
-	auto dir_distr = std::uniform_int_distribution<int>{0, static_cast<int>(Direction::DIRS_N)};
-	do {
-		cord = nextCord(prev_pos, static_cast<Direction>(dir_distr(rand_gen)));
-	} while (checkIfFree(cord));
-	return cord;
-}
-#endif
+
+
 void Game::tick() {
-	auto sz = view_->getSize();
-	while (rabbits_.size() < INIT_RABBIT_N)
+	auto view = View::get();
+	auto sz = view->getSize();
+	rabbits_.remove_if([=](auto r)
+			{ return !r.pos.inside(sz) && (view->drawEmpty(r.pos), true); }
+		);
+	while (rabbits_.size() < rabs_n_)
 		rabbits_.emplace_back(getFreePos());
 	for (auto r : rabbits_) {
-		view_->drawRab(r.pos);
+		view->drawRab(r.pos);
 	}
 	for (auto&& snake : snakes_) {
 		auto next = nextCord(snake.cords_.front(), snake.dir_);
@@ -103,20 +99,24 @@ void Game::tick() {
 			auto &b = s.cords_;
 			return std::find(b.cbegin(), b.cend(), next) != b.cend();
 		};
-		if (next.x < 0 || next.x > sz.x || next.y < 0 || next.y > sz.y
-			|| std::find_if(snakes_.cbegin(), snakes_.cend(), pred) != snakes_.cend()) {
+		if (	(next.x < 0 && snake.dir_ == X_DEC )	||
+			(next.x > sz.x && snake.dir_ == X_INC)	||
+			(next.y < 0 && snake.dir_ == Y_DEC)	||
+			(next.y > sz.y && snake.dir_ == Y_INC)	||
+			std::find_if(snakes_.cbegin(), snakes_.cend(), pred) != snakes_.cend())
+		{
 			for (auto pos : snake.cords_)
-				view_->drawEmpty(pos);
+				view->drawEmpty(pos);
 			snake.cords_.clear();
 		} else {
 			auto rab_it = std::find(rabbits_.begin(), rabbits_.end(), next);
 			if (rab_it != rabbits_.end()) {
 				snake.cords_.emplace_front(next);
-				view_->drawSnake(snake.cords_.front(), snake.clr_);
+				view->drawSnake(snake.cords_.front(), snake.clr_);
 				rabbits_.erase(rab_it);
 			} else {
 				snake.cords_.emplace_front(next);
-				view_->drawSnake(snake.cords_.front(), snake.cords_.back(), snake.clr_);
+				view->drawSnake(snake.cords_.front(), snake.cords_.back(), snake.clr_);
 				snake.cords_.pop_back();
 			}
 		}

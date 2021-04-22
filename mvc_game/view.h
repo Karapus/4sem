@@ -6,6 +6,9 @@
 struct Coord {
 	int x;
 	int y;
+	bool inside(Coord sz) const {
+		return x > 0 && x < sz.x && y > 0 && y < sz.y;
+	}
 };
 
 enum Color { BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE}
@@ -13,7 +16,7 @@ enum Color { BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE}
 
 struct View {
 	using KeyFn = std::function<void(int)>; 
-	using TimerFn = std::function<void()>; 
+	using TimerFn = std::function<void()>;
 protected:
 	std::list<KeyFn>  callkey_;
 	std::list<TimerFn> calltimer_;
@@ -38,6 +41,6 @@ public:
 	virtual Coord getSize() const = 0;
 	
 	virtual ~View() = default;
-	static View *get(std::string_view arg);
+	static View *get(std::string_view arg = "");
 	View() = default;
 };
