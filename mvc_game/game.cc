@@ -62,11 +62,16 @@ Rabbit::Rabbit(Coord p) : pos(p) {
 
 bool Game::checkIfFree(Coord cord) const {
 	auto rab_pred = [&](auto rab){ return rab.pos == cord;};
+	return std::any_of(rabbits_.cbegin(), rabbits_.cend(), rab_pred)
+		|| checkIfCanMove(cord);
+}
+
+bool Game::checkIfCanMove(Coord cord) const {
 	auto snake_pred = [&](auto snake){
 		auto body = snake.getCords();
 		return std::any_of(body.cbegin(), body.cend(), 
 				[&](auto pos){return pos == cord; }); };
-	return std::any_of(rabbits_.cbegin(), rabbits_.cend(), rab_pred) || std::any_of(snakes_.cbegin(), snakes_.cend(), snake_pred);
+	return std::any_of(snakes_.cbegin(), snakes_.cend(), snake_pred);
 }
 
 Coord Game::getFreePos() const {
@@ -94,6 +99,9 @@ void Game::tick() {
 		view->drawRab(r.pos);
 	}
 	for (auto&& snake : snakes_) {
+		if (!snake.can_move) {
+			continue;
+		}
 		auto next = nextCord(snake.cords_.front(), snake.dir_);
 		auto pred = [=] (auto &&s) {
 			auto &b = s.cords_;
@@ -105,9 +113,7 @@ void Game::tick() {
 			(next.y > sz.y && snake.dir_ == Y_INC)	||
 			std::find_if(snakes_.cbegin(), snakes_.cend(), pred) != snakes_.cend())
 		{
-			for (auto pos : snake.cords_)
-				view->drawEmpty(pos);
-			snake.cords_.clear();
+			killers_.emplace_back(&snake);
 		} else {
 			auto rab_it = std::find(rabbits_.begin(), rabbits_.end(), next);
 			if (rab_it != rabbits_.end()) {
@@ -120,6 +126,8 @@ void Game::tick() {
 				snake.cords_.pop_back();
 			}
 		}
+		for (auto &&killer : killers_)
+			killer();
 	}
 }
 
