@@ -62,16 +62,16 @@ Rabbit::Rabbit(Coord p) : pos(p) {
 
 bool Game::checkIfFree(Coord cord) const {
 	auto rab_pred = [&](auto rab){ return rab.pos == cord;};
-	return std::any_of(rabbits_.cbegin(), rabbits_.cend(), rab_pred)
-		|| checkIfCanMove(cord);
+	return std::none_of(rabbits_.cbegin(), rabbits_.cend(), rab_pred)
+		&& checkIfCanMove(cord);
 }
 
 bool Game::checkIfCanMove(Coord cord) const {
 	auto snake_pred = [&](auto snake){
 		auto body = snake.getCords();
-		return std::any_of(body.cbegin(), body.cend(), 
+		return std::none_of(body.cbegin(), body.cend(), 
 				[&](auto pos){return pos == cord; }); };
-	return std::any_of(snakes_.cbegin(), snakes_.cend(), snake_pred);
+	return std::all_of(snakes_.cbegin(), snakes_.cend(), snake_pred);
 }
 
 Coord Game::getFreePos() const {
@@ -82,7 +82,7 @@ Coord Game::getFreePos() const {
 	do {
 		cord.x = x_distr(rand_gen);
 		cord.y = y_distr(rand_gen);
-	} while (checkIfFree(cord));
+	} while (!checkIfFree(cord));
 	return cord;
 }
 
